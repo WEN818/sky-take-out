@@ -1,21 +1,29 @@
 package com.sky.service.impl;
 
+import ch.qos.logback.classic.Logger;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
+import com.sky.result.Result;
 import com.sky.service.EmployeeService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
 
@@ -90,6 +98,28 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //调用Mapper层，执行插入操作
         employeeMapper.insert(employee);
+    }
+
+    /**
+     * 员工分页查询
+     * TODO log?而且和视频里不一样
+     * @param employeePageQueryDTO
+     * @return
+     */
+    @Override
+    @GetMapping("/page")
+    @ApiOperation("员工分页查询")
+    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+        Logger log = null;//?
+        log.info("员工分页查询：参数为{}", employeePageQueryDTO);
+
+        PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+
+        Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);
+
+        long total = page.getTotal();
+        PageResult pageResult = new PageResult(total, page.getResult());
+        return pageResult;
     }
 
 }
