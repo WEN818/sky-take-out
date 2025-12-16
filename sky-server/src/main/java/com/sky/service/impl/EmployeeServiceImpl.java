@@ -89,12 +89,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setPassword(password);
 
         //设置当前记录的创建时间和更新时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
+        //employee.setCreateTime(LocalDateTime.now());
+        //employee.setUpdateTime(LocalDateTime.now());
 
         //设置当前记录的创建人id和修改人id
-        employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
+        //employee.setCreateUser(BaseContext.getCurrentId());
+        //employee.setUpdateUser(BaseContext.getCurrentId());
 
         //调用Mapper层，执行插入操作
         employeeMapper.insert(employee);
@@ -110,8 +110,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @GetMapping("/page")
     @ApiOperation("员工分页查询")
     public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
-        Logger log = null;//?
-        log.info("员工分页查询：参数为{}", employeePageQueryDTO);
 
         PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
 
@@ -120,6 +118,60 @@ public class EmployeeServiceImpl implements EmployeeService {
         long total = page.getTotal();
         PageResult pageResult = new PageResult(total, page.getResult());
         return pageResult;
+    }
+
+    /**
+     * 启用禁用员工
+     *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        //根据id查询员工信息
+        //Employee employee = employeeMapper.getById(id);
+
+        //设置员工状态
+        //employee.setStatus(status);
+
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();//链式编程
+
+        //调用Mapper层，执行更新操作
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询员工信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+        Employee employee = employeeMapper.getById(id);
+        employee.setPassword("****");
+        return employee;
+    }
+
+    /**
+     * 修改员工信息
+     *
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        //对象属性拷贝
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);//注意前后顺序
+        //设置修改时间
+        //employee.setUpdateTime(LocalDateTime.now());
+        //设置修改人id, 底层通过ThreadLocal获取当前登录用户id（拦截器设置的）
+        //employee.setUpdateUser(BaseContext.getCurrentId());
+
+        employeeMapper.update(employee);
     }
 
 }
